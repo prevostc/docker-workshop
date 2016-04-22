@@ -1,10 +1,17 @@
 import postgresql
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import os
 
 class MyHandler(BaseHTTPRequestHandler):
+    def _get_db(self):
+        // use environment variables but defaults to local if not set
+        dbHost = os.getenv('POSTGRES_PORT_5432_TCP_ADDR', 'localhost')
+        dbPort = os.getenv('POSTGRES_PORT_5432_TCP_PORT', '5432')
+        return postgresql.open('pq://dockerworkshop:dockerworkshop@{0}:{1}/dockerworkshop'.format(dbHost, dbPort))
+
     def do_GET(self):
-        db = postgresql.open('pq://dockerworkshop:dockerworkshop@localhost:5432/dockerworkshop')
+        db = self._get_db()
         proc = db.proc("version()")
         res = proc()
 

@@ -24,13 +24,15 @@ $install_postgres = <<SCRIPT
     apt-get update
     apt-get install postgresql-9.5 --yes
     # don't do this at home please, I felt bad by typing it
-    sed -i.bak 's/peer/trust/' /etc/postgresql/9.5/main/pg_hba.conf
-    sed -i.bak 's/md5/trust/' /etc/postgresql/9.5/main/pg_hba.conf
-    pg_ctlcluster 9.5 main restart
+    # sed -i.bak 's/peer/trust/' /etc/postgresql/9.5/main/pg_hba.conf
+    # sed -i.bak 's/md5/trust/' /etc/postgresql/9.5/main/pg_hba.conf
+    # pg_ctlcluster 9.5 main restart
 SCRIPT
 
 $install_project_requirements = <<SCRIPT
+    echo "localhost:5432:dockerworkshop:dockerworkshop:dockerworkshop" > /home/vagrant/.pgpass
     su postgres -c "psql -p 5432 -h localhost template1 -f /home/vagrant/docker-workshop/create_db.sql"
+    su postgres -c "psql -p 5432 -h localhost -U dockerworkshop dockerworkshop -f /home/vagrant/docker-workshop/create_schema_and_fixtures.sql"
     apt-get install python3-setuptools --yes
     easy_install3 pip
     pip install -r requirements.txt
