@@ -23,10 +23,10 @@ $install_postgres = <<SCRIPT
     echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list
     apt-get update
     apt-get install postgresql-9.5 --yes
-    # don't do this at home please, I felt bad by typing it
-    # sed -i.bak 's/peer/trust/' /etc/postgresql/9.5/main/pg_hba.conf
-    # sed -i.bak 's/md5/trust/' /etc/postgresql/9.5/main/pg_hba.conf
-    # pg_ctlcluster 9.5 main restart
+    echo "listen_addresses = '*'" >> /etc/postgresql/9.5/main/postgresql.conf
+    echo "host all all 0.0.0.0/0 trust" > /etc/postgresql/9.5/main/pg_hba.conf
+    echo "local all all   trust" >> /etc/postgresql/9.5/main/pg_hba.conf
+    pg_ctlcluster 9.5 main restart
 SCRIPT
 
 $install_project_requirements = <<SCRIPT
@@ -65,6 +65,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
  # automatically cd to project dir on login
  config.vm.provision :shell, inline: "echo 'cd /home/vagrant/docker-workshop' > /home/vagrant/.bashrc"
+
+ # fix locale issue https://github.com/mitchellh/vagrant/issues/1188
+ config.vm.provision :shell, :inline => <<-EOT
+      echo 'LC_ALL="en_US.UTF-8"'  >  /etc/default/locale
+EOT
 
  # install project
  config.vm.provision :shell, privileged:true, inline: $install_docker
