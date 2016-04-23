@@ -23,19 +23,14 @@ class MyHandler(BaseHTTPRequestHandler):
         })
 
     def do_GET(self):
-        print("GET all calls")
-        db = self._get_db()
-        rows = db.query("SELECT id, created_at, payload FROM call")
-        print (rows)
+        print ("Received GET request")
+        rows = self._get_db().query("SELECT id, created_at, payload FROM call")
         self._send_response(self._serialize(rows))
 
     def do_POST(self):
         print ("Received POST request")
-        db = self._get_db()
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len).decode("utf-8")
-        rows = db.query("INSERT INTO call (payload) VALUES ($1) RETURNING *", post_body)
-        print (rows)
+        post_body = self.rfile.read(int(self.headers.get('content-length', 0))).decode("utf-8")
+        rows = self._get_db().query("INSERT INTO call (payload) VALUES ($1) RETURNING *", post_body)
         self._send_response(self._serialize(rows))
 
 print("Server is running on port 8080")
