@@ -13,7 +13,7 @@ The vagrant comes with a PostgreSQL DB and a small python server
 
 - vagrant ssh on 2 consoles
 - Start the server with `python3 server.py`
-- Test the server with `curl -XGET http://localhost:8080`
+- Test the server with `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
 
 OK, now let's put these inside containers.
 
@@ -66,7 +66,7 @@ Ouch, that's a lot of of options but it's all about explicitly specifying every 
 * `-p` is a simple port mapping option, in this case, the container outside `8080` maps to the `8080` port
 * `-it` binds the container in a way that simulates a TTY, I won't go into details here (because I can't :p)
 
-To check that the container is properly running, open another terminal and do `docker ps`.
+To check that the container is properly running, open another terminal and do `docker ps`. You should be able to `curl -XGET http://localhost:8080`.
 
 
 At this point, you should experiment with the various `docker run` options.

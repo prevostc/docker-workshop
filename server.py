@@ -10,17 +10,33 @@ class MyHandler(BaseHTTPRequestHandler):
         dbPort = os.getenv('POSTGRES_PORT_5432_TCP_PORT', '5432')
         return postgresql.open('pq://dockerworkshop:dockerworkshop@{0}:{1}/dockerworkshop'.format(dbHost, dbPort))
 
-    def do_GET(self):
-        db = self._get_db()
-        proc = db.proc("version()")
-        res = proc()
-
+    def _send_response(self, content):
         self.send_response(200)
-        self.send_header('Content-type', 'text/text')
+        self.send_header('Content-type', 'application/json')
         self.end_headers()
+        self.wfile.write((content+'\n').encode("utf-8"))
 
-        print("Hey I'm doing stuff")
-        self.wfile.write((res+'\n').encode("utf-8"))
+    def _serialize(self, rows):
+        return json.dumps({
+            'count': len(rows),
+            'rows': [{'id': row[0], 'created_at': str(row[1]), 'payload': row[2]} for row in rows]
+        })
+
+    def do_GET(self):
+        print("GET all calls")
+        db = self._get_db()
+        rows = db.query("SELECT id, created_at, payload FROM call")
+        print (rows)
+        self._send_response(self._serialize(rows))
+
+    def do_POST(self):
+        print ("Received POST request")
+        db = self._get_db()
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len).decode("utf-8")
+        rows = db.query("INSERT INTO call (payload) VALUES ($1) RETURNING *", post_body)
+        print (rows)
+        self._send_response(self._serialize(rows))
 
 print("Server is running on port 8080")
 server = HTTPServer(('', 8080), MyHandler)

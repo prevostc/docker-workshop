@@ -4,3 +4,5 @@ CREATE TABLE call (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   payload TEXT NOT NULL DEFAULT ''
 );
+
+INSERT INTO call (payload) VALUES ('Hello World');
