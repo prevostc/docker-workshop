@@ -1,6 +1,17 @@
 # Docker workshop
 
-We will learn how to use docker by typing some stuff on a terminal
+We will learn how to use docker by typing some stuff on a terminal.
+
+This step by step tutorial is designed for anyone that already know a little bit of theory about docker but need more practice to really get a grasp on it.
+
+IMPORTANT NOTES:
+* Some steps ends with an EXERCISE. It is important that you try to answer the question before running any command, your first answers will be mostly guesses but you should get better and better with time :)
+* Raw docker forces us to type command with a lot of options, please take time to go through each of theses options as it is important that you understand most of them
+
+Author notes:
+* I hope you will learn and enjoy going through this tutorial as much as I learned and enjoyed writing it and I also hope the step by step approach will demystify the docker black box.
+* If I missed something important or made a mistake, please create an issue or a PR to improve this tutorial.
+* Please note that english is not my native language and while I'm confident that this tutorial makes sense, I don't know how it sounds to a native speaker. Any comment or advice is welcome.
 
 # Pre-requisites
 
@@ -9,11 +20,12 @@ We will learn how to use docker by typing some stuff on a terminal
 
 # 0 - The db and the server
 
-The vagrant comes with a PostgreSQL DB and a small python server
+The provided vagrant comes with a PostgreSQL DB and a small python server
 
-- vagrant ssh on 2 consoles
-- Start the server with `python3 server.py`
-- Test the server with `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
+1. Start the virtual machine with `vagrant up`
+2. `vagrant ssh` is used to login to the vm
+3. Start the server with `python3 server.py`
+4. On another terminal, `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
 
 OK, now let's put these inside containers.
 
@@ -30,27 +42,29 @@ IMPORTANT: A quick reminder if you don't remember what is an image and what is a
 
 # 1 - Craft a custom web server image
 
-Check that no container is already running with `docker ps`
+Check that no container is already running with `docker ps` and that no image has been created with `docker images`.
+
+Ok, the first step is to build a custom container image. This image will contain everything we need to run server.py (python3 and the dependencies listed in requirements.txt).
 
 EXERCISE: What will the following command do ? `docker build -t docker-workshop-web:1.0 .`
 
-* Create a new container named `docker-workshop-web:1.0` with the current directory as main directory
-* Download python 3 base image and create a new image based on our application requirements.txt
-* An error, our application source code is missing
-* Docker will ask a bunch of question to determine what type of image should be built  
+1. Create a new container named `docker-workshop-web:1.0` with the current directory as main directory
+2. Download python 3 base image and create a new image based on our application requirements.txt
+3. An error, our application source code is missing
+4. Docker will ask a bunch of question to determine what type of image should be built  
 
 # 2 - Run the web server as a container
 
-We should see the image with `docker images` When building a custom image, the simplest way is to provide docker with a Dockerfile. A Dockerfile is basically a provisioning script, but we may also build our custom image using `docker commit` on a running container (more on that later).
+We should see the image with `docker images` When building a custom image, the simplest way is to provide docker with a Dockerfile. A Dockerfile is a build script, but we may also build our custom image using `docker commit` on a running container (more on that later).
 
 Now that our image is carefully crafted with our web server dependencies inside (python3 and some custom pip packages), let's create a new instance of our web server but running inside a container.
 
 EXERCISE: What will the following command do ? `docker run --rm --name=docker-workshop-web-1 docker-workshop-web:1.0 python server.py`
 
-* An error, the `--rm` option does not exists
-* Create a new container named `docker-workshop-web-1` running our python server
-* Create a background container and echo the container ID, I will be able to fetch the container logs with `docker logs docker-workshop-web-1`
-* An error, the server.py file does not exists
+1. An error, the `--rm` option does not exists
+2. Create a new container named `docker-workshop-web-1` running our python server
+3. Create a background container and echo the container ID, but the database is unreachable
+4. An error, the server.py file does not exists
 
 # 3 - Run the web server as a container (for real this time)
 
@@ -60,10 +74,10 @@ The previous command failed to find our server.py because the Dockerfile didn't 
 
 `docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=192.168.33.10 docker-workshop-web:1.0 python /home/server.py`
 
-Ouch, that's a lot of of options but it's all about explicitly specifying everything our program needs to execute and his external dependencies.
+Ouch, that's a lot of of options but it's all about being explicit about everything our program needs to execute:
 * The server.py file got mounted on the container with the `-v` options
-* We told the server where he should find PostgreSQL running using a custom environment variable
-* `-p` is a simple port mapping option, in this case, the container outside `8080` maps to the `8080` port
+* We told the server where he should find PostgreSQL running with a custom environment variable
+* `-p` is used to publish ports, in this case, the container `8080` is published as the `8080` port
 * `-it` binds the container in a way that simulates a TTY, I won't go into details here (because I can't :p)
 
 Don't worry though, with `docker-compose` we can write down all these options in a .yml file so we don't have to type a command line that long every time we want to start a container (more on that later).
@@ -86,8 +100,8 @@ We should see additional PostgreSQL images with `docker images`.
 We can see that the new container is running at 172.17.0.2 with `docker inspect --format '{{ .NetworkSettings.IPAddress }}' docker-workshop-db-1`
 
 Setup the database with the following:
-* `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
-* `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
+1. Create the database with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
+2. Create the schema with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
 
 Now restart the web server with `docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=172.17.0.2 docker-workshop-web:1.0 python /home/server.py`
 
@@ -95,45 +109,51 @@ Everything should be as before with both `curl -XGET http://localhost:8080` and 
 
 EXERCISE: What would happen we `docker restart docker-workshop-db-1` ?
 
-* Nothing bad, the database will restart and no data will be lost
-* The database won't stop as the web server is holding an active connexion to it
-* The container will restart and my data will be lost
-* The database will restart with another ip and the web server will display an error
+1. Nothing bad, the database will restart and no data will be lost
+2. The database won't stop as the web server is holding an active connexion to it
+3. The container will restart and my data will be lost
+4. The database will restart with another ip and the web server will display an error
 
 EXERCISE: What if we `docker stop docker-workshop-db-1`, `docker rm docker-workshop-db-1` and restart the database container ?
 
-* Nothing bad, the database will restart and no data will be lost
-* The database won't stop as the web server is holding an active connexion to it
-* The container will restart and my data and schema will be lost
-* The database will restart with another ip and the web server will display an error
+1. Nothing bad, the database will restart and no data will be lost
+2. The database won't stop as the web server is holding an active connexion to it
+3. The container will restart and my data and schema will be lost
+4. The database will restart with another ip and the web server will display an error
 
 EXERCISE: Can you come up with a way to start the database container that avoid this behavior ?
 
 # 4 - Commit & Data management
 
-To avoid loosing our data every time the container gets stopped and removed, we can play with the `-v` option to map the PostgreSQL data directory on our host system (be careful not to mount a directory from ~/docker-workshop as VirtualBox will forbid PostgreSQL to change the directory ownership): `run -d --name docker-workshop-db-1 -v /pg_data:/var/lib/postgresql/data postgres:9.5`
+To avoid loosing our data every time the container gets stopped and removed, we can play with the `-v` option to map the PostgreSQL data directory on our host system (be careful not to mount a directory from ~/docker-workshop as VirtualBox will forbid PostgreSQL to change the directory ownership): `run -d --name docker-workshop-db-1 -e PGDATA=/pg_data -v /pg_data:/pg_data postgres:9.5`
 
-Please note that this is not the recommended way to do so. Docker support volume plugins that abstract the data management away. You should check out the [List of built in plugins](https://github.com/docker/docker/blob/master/docs/extend/plugins.md), especially the well-known Flocker and Convoy plugins.
+Please note that while this works well on a development environment, this is not the recommended way to manage data volumes. Docker support volume plugins that abstract the data management away. You should check out the [List of built in plugins](https://github.com/docker/docker/blob/master/docs/extend/plugins.md), especially the well-known Flocker and Convoy plugins.
 
 At any time, we can also create a new image based on the state of a container.
 Make sure the database is stopped and run the following commands:
-* Start the database container with `docker run -d -e PGDATA=/pg_data --name docker-workshop-db-1 postgres:9.5` (this is important because of [this](http://stackoverflow.com/a/27378619/2523414)).
-* Re-create the database with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
-* Re-create the schema with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
-* Insert some custom data with the web server `curl -XPOST http://localhost:8080 -d 'Such payload, much content!'`
+1. Start the database container with `docker run -d -e PGDATA=/pg_data --name docker-workshop-db-1 postgres:9.5` (this is important because of [this](http://stackoverflow.com/a/27378619/2523414)).
+2. Re-create the database with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
+3. Re-create the schema with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
+4. Insert some custom data with the web server `curl -XPOST http://localhost:8080 -d 'Such payload, much content!'`
 
-Now that everything is is a good shape, we can commit the container state with `docker commit docker-workshop-db-1 docker-workshop-db:1.0`. Now checkout the image list `docker images` and stop the database container `docker stop docker-workshop-db-1 && docker rm docker-workshop-db-1`.
+Now that everything is in good shape, we can commit the container state with `docker commit docker-workshop-db-1 docker-workshop-db:1.0`. Now checkout the image list `docker images` and stop the database container `docker stop docker-workshop-db-1 && docker rm docker-workshop-db-1`.
 
 We should be able to restart the database from our previous state with `docker run -d --name docker-workshop-db-1 docker-workshop-db:1.0`
 
-# 5 - Docker compose
+# 5 - Container management systems
 
-Tired of typing long commands ? I prepared a nice docker-compose file. 
+Tired of typing long commands ? I prepared docker-compose file. Now all you have to do to start everything is `docker-compose up`.
+Now that you know the docker basics, you can dig into the [docker-compose documentation](https://docs.docker.com/compose/compose-file/) on your own without too much trouble.
 
-# 5 - Conclusion
+# 6 - Conclusion
 
-We went from a python web app and a PostgreSQL that needed some provisioning in order to work to a fully packaged application with ultra-standard boundaries in term of volumes, network and metrics inspection. In the process we learned a little bit more about the various docker commands.
+We went from a raw python web app and a PostgreSQL database and some simple provisioning scripts to a fully packaged application with ultra-standard boundaries in term of volumes, network and metrics inspection. In the process we learned a little bit more about the various docker commands and internals. In the end, we are now better aware of the docker capabilities and limitations and we can thoughtfully add it to our toolbox.
 
-Further Experiments:
+But the docker journey doesn't end yet! Standard application boundaries means we can automate a LOT of things. Here are some further Experiments:
 * Get rid of Vagrant: Install docker on your system and transfer the database image to your new docker instance
-*
+* Learn more about `docker network`
+* Learn more about docker volumes and volume plugins
+* Put a load balancer in front of the web app and start many web containers using docker-compose scale
+* Play with docker swarm
+* Explore docker hub and create a Wordpress or a Prestashop container with one command only! :)
+* Check out ultra-specialized micro-containers from iron.io

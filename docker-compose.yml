@@ -1,0 +1,15 @@
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+     - "8080:8080"
+    volumes:
+     - ./server.py:/home/server.py
+    depends_on:
+     - db
+    environment:
+     - POSTGRES_PORT_5432_TCP_ADDR=dockerworkshop_db_1
+    command: python /home/server.py
+  db:
+    image: docker-workshop-db:1.0
