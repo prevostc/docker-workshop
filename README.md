@@ -54,6 +54,10 @@ In short: just regular linux processes with a lot of resource namespaces, but no
 
 Now that we know we're in know linux land, let's see how docker leverage these technologies.
 
+Note, that the previous quotes are from docker 0.7, since then docker started the open container project and uses [RunC](https://runc.io/) and [ContainerD](https://containerd.tools/) internally.
+
+> RunC is a lightweight, portable container runtime. It includes all of the plumbing code used by Docker to interact with system features related to containers [blog.docker.com](https://blog.docker.com/2015/06/runc/)
+
 # 1 - Craft a custom web server image
 
 As the first step, we are going to put our web server in a container. The first step is to build a custom container image. This image will contain everything we need to run server.py (python3 and the dependencies listed in requirements.txt).
