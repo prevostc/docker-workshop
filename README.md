@@ -24,7 +24,7 @@ Author notes:
 
 The provided vagrant comes with a PostgreSQL DB and a small python server
 
-1. Start the virtual machine with `vagrant up`
+1. Start the virtual machine with `vagrant up` (this might take some time, continue your reading in the meantime)
 2. `vagrant ssh` is used to login to the vm
 3. Start the server with `python3 server.py`
 4. On another terminal, `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
