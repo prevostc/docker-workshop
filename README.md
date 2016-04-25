@@ -4,6 +4,8 @@ We will learn how to use docker by typing some stuff on a terminal.
 
 This step by step tutorial is designed for anyone that already know a little bit of theory about docker but need more practice to really get a grasp on it.
 
+If you feel that you need a more detailed tutorial to get started, Docker inc. built his own, more in-depth, tutorial for beginners: https://github.com/docker/docker-birthday-3/blob/master/tutorial.md
+
 IMPORTANT NOTES:
 * Some steps ends with an EXERCISE. It is important that you try to answer the question before running any command, your first answers will be mostly guesses but you should get better and better with time :)
 * Raw docker forces us to type command with a lot of options, please take time to go through each of theses options as it is important that you understand most of them
