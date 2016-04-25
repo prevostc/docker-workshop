@@ -35,18 +35,32 @@ OK, now let's put these inside containers.
 
 Our application server works well, but the install procedure is quite long, we need python, PostgreSQL, some build tools, a database, and some scripts (@see Vagrantfile:$install_project_requirements)
 
-Containers will allow us to start our app on any machine without any provisioning process.
+Containers will allow us to start our app on any machine without any prior provisioning process.
 The final container will be shipped with his dependencies and will be (near) totally isolated from any other program running alongside.
 
-How is that possible ? https://www.docker.com/what-docker
+How is that possible ? Docker is no black magic, under the hood a process running "in a container" is just a regular process running on your host machine.
 
-IMPORTANT: A quick reminder if you don't remember what is an image and what is a container: http://stackoverflow.com/a/21499102/2523414
+I have to trust linux kernel specialists on this but here are some interesting quotes:
+
+> There are six namespaces in Linux (mnt, ipc, net, usr etc.). Using these namespaces a container can have its own network interfaces, ip address etc. Each container will have its own namespace and the processes running inside that namespace will not have any privileges outside its namespace. [devopscube.com](http://devopscube.com/what-is-docker/)
+
+> Linux Containers and LXC, a user-space control package for Linux Containers, constitute the core of Docker. LXC uses kernel-level namespaces to isolate the container from the host. The user namespace separates the container's and the host's user database, thus ensuring that the container's root user does not have root privileges on the host. The process namespace is responsible for displaying and managing only processes running in the container, not the host. And, the network namespace provides the container with its own network device and virtual IP address. [linuxjournal.com](http://www.linuxjournal.com/content/docker-lightweight-linux-containers-consistent-development-and-deployment)
+
+> Another component of Docker provided by LXC are Control Groups (cgroups). While namespaces are responsible for isolation between host and container, control groups implement resource accounting and limiting. While allowing Docker to limit the resources being consumed by a container, such as memory, disk space and I/O, cgroups also output lots of metrics about these resources. These metrics allow Docker to monitor the resource consumption of the various processes within the containers and make sure that each gets only its fair share of the available resources. [linuxjournal.com](http://www.linuxjournal.com/content/docker-lightweight-linux-containers-consistent-development-and-deployment)
+
+> In addition to the above components, Docker has been using AuFS (Advanced Multi-Layered Unification Filesystem) as a filesystem for containers. AuFS is a layered filesystem that can transparently overlay one or more existing filesystems. When a process needs to modify a file, AuFS creates a copy of that file. AuFS is capable of merging multiple layers into a single representation of a filesystem. This process is called copy-on-write. [linuxjournal.com](http://www.linuxjournal.com/content/docker-lightweight-linux-containers-consistent-development-and-deployment)
+
+In short: just regular linux processes with a lot of resource namespaces, but no magic involved.
+
+Now that we know we're in know linux land, let's see how docker leverage these technologies.
 
 # 1 - Craft a custom web server image
 
+As the first step, we are going to put our web server in a container. The first step is to build a custom container image. This image will contain everything we need to run server.py (python3 and the dependencies listed in requirements.txt).
+
 Check that no container is already running with `docker ps` and that no image has been created with `docker images`.
 
-Ok, the first step is to build a custom container image. This image will contain everything we need to run server.py (python3 and the dependencies listed in requirements.txt).
+Based on what you know, you should already be able to solve the first exercise :)
 
 EXERCISE: What will the following command do ? `docker build -t docker-workshop-web:1.0 .`
 
