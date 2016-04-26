@@ -121,6 +121,11 @@ We should see additional PostgreSQL images with `docker images`.
 
 We can see that the new container is running at 172.17.0.2 with `docker inspect --format '{{ .NetworkSettings.IPAddress }}' docker-workshop-db-1`
 
+Now we have to re-create the database, our user and our schema on the new PostgreSQL instance, the one running inside the container.
+All we have to do is run `create_db.sql` and `create_schema_and_fixtures.sql` with the `psql -f ` command.
+
+EXERCISE: Run `sudo apt-get purge postgresql-client-9.5` and try to run these scripts on your already running database.
+
 Setup the database with the following:
 1. Create the database with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
 2. Create the schema with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
