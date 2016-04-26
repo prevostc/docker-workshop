@@ -26,8 +26,8 @@ The provided vagrant comes with a PostgreSQL DB and a small python server
 
 1. Start the virtual machine with `vagrant up` (this might take some time, continue your reading in the meantime)
 2. `vagrant ssh` is used to login to the vm
-3. Start the server with `python3 server.py`
-4. On another terminal, `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
+3. Inside vagrant, start the server with `python3 server.py` to start our simple server
+4. On another terminal, still inside vagrant `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"` to play with the included web server
 
 OK, now let's put these inside containers.
 
@@ -62,7 +62,9 @@ Note, that the previous quotes are from docker 0.7, since then docker started th
 
 As the first step, we are going to put our web server in a container. The first step is to build a custom container image. This image will contain everything we need to run server.py (python3 and the dependencies listed in requirements.txt).
 
-Check that no container is already running with `docker ps` and that no image has been created with `docker images`.
+Please check that your docker install is ok with `docker run hello-world`
+
+Check that no container is already running with `docker ps` and check the available images with `docker images`.
 
 Based on what you know, you should already be able to solve the first exercise :)
 
