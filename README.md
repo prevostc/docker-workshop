@@ -7,7 +7,7 @@ This step by step tutorial is designed for anyone that already know a little bit
 If you feel that you need a more detailed tutorial to get started, Docker inc. built his own, more in-depth, tutorial for beginners: https://github.com/docker/docker-birthday-3/blob/master/tutorial.md
 
 IMPORTANT NOTES:
-* Some steps ends with an EXERCISE. It is important that you try to answer the question before running any command, your first answers will be mostly guesses but you should get better and better with time :)
+* Some steps ends with an EXERCISE. It is important that you try to answer the question before running any command, your first answers will be mostly guesses but you should get better and better with time :) The answer is always on the next step of the tutorial.
 * Raw docker forces us to type command with a lot of options, please take time to go through each of theses options as it is important that you understand most of them
 
 Author notes:
@@ -81,7 +81,7 @@ We should see the image with `docker images` When building a custom image, the s
 
 Now that our image is carefully crafted with our web server dependencies inside (python3 and some custom pip packages), let's create a new instance of our web server but running inside a container.
 
-EXERCISE: What will the following command do ? `docker run --rm --name=docker-workshop-web-1 docker-workshop-web:1.0 python server.py`
+EXERCISE: What will the following command do ? `docker run --rm --name=docker-workshop-web-1 docker-workshop-web:1.0 python3 server.py`
 
 1. An error, the `--rm` option does not exists
 2. Create a new container named `docker-workshop-web-1` running our python server
@@ -90,11 +90,11 @@ EXERCISE: What will the following command do ? `docker run --rm --name=docker-wo
 
 # 3 - Run the web server as a container (for real this time)
 
-Using this command, we asked docker to create a new container named `docker-workshop-web-1` based on the image `docker-workshop-web:1.0`. `--rm` means that we want the container removed once the main process is stopped. And `python server.py` is the "entry point", it tells docker to run this command inside the container to keep it running.
+Using this command, we asked docker to create a new container named `docker-workshop-web-1` based on the image `docker-workshop-web:1.0`. `--rm` means that we want the container removed once the main process is stopped. And `python3 server.py` is the "entry point", it tells docker to run this command inside the container to keep it running.
 
 The previous command failed to find our server.py because the Dockerfile didn't crafted our application code inside the container image. We can fix it at runtime with a volume mount:
 
-`docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=192.168.33.10 docker-workshop-web:1.0 python /home/server.py`
+`docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=192.168.33.10 docker-workshop-web:1.0 python3 /home/server.py`
 
 Ouch, that's a lot of of options but it's all about being explicit about everything our program needs to execute:
 * The server.py file got mounted on the container with the `-v` options
@@ -110,7 +110,7 @@ At this point, you should also experiment with the various `docker run` options.
 
 Further Experiments:
 * Start a shell inside the running container with `docker exec -it docker-workshop-web-1 bash` and compare inside and outside basic command outputs like `ps auxf` (tree view) or `htop`
-* Uninstall python PostgreSQL package with `sudo pip uninstall py-postgresql` and check your container health
+* Uninstall python PostgreSQL package with `sudo pip3 uninstall py-postgresql` and check your container health
 * Don't forget to take a look at the Dockerfile
 
 # 3 - Run the database as a container
@@ -125,7 +125,7 @@ Setup the database with the following:
 1. Create the database with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U postgres -f /home/create_db.sql postgres'`
 2. Create the schema with `docker run -it --rm -v "$PWD"/:/home/ postgres:9.5 sh -c 'exec psql -h 172.17.0.2 -p 5432 -U dockerworkshop -f /home/create_schema_and_fixtures.sql dockerworkshop'`
 
-Now restart the web server with `docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=172.17.0.2 docker-workshop-web:1.0 python /home/server.py`
+Now restart the web server with `docker run --rm -it --name=docker-workshop-web-1 -v "$PWD"/server.py:/home/server.py -p 8080:8080 -e POSTGRES_PORT_5432_TCP_ADDR=172.17.0.2 docker-workshop-web:1.0 python3 /home/server.py`
 
 Everything should be as before with both `curl -XGET http://localhost:8080` and `curl -XPOST http://localhost:8080 -d "Hello world"`
 

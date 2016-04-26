@@ -1,5 +1,6 @@
-FROM python:3
+FROM iron/python:3
 
 WORKDIR /home/
 COPY requirements.txt /home/
-RUN pip install -v -r requirements.txt
+RUN python3 -m ensurepip
+RUN pip3 install -v -r requirements.txt

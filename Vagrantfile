@@ -39,7 +39,7 @@ $install_project_requirements = <<SCRIPT
     su postgres -c "psql -p 5432 -h localhost -U dockerworkshop dockerworkshop -f /home/vagrant/docker-workshop/create_schema_and_fixtures.sql"
     apt-get install python3-setuptools --yes
     easy_install3 pip
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
