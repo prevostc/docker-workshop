@@ -141,7 +141,7 @@ EXERCISE: What would happen we `docker restart docker-workshop-db-1` ?
 3. The container will restart and my data will be lost
 4. The database will restart with another ip and the web server will display an error
 
-EXERCISE: What if we `docker stop docker-workshop-db-1`, `docker rm docker-workshop-db-1` and restart the database container ?
+EXERCISE: What if we `docker stop docker-workshop-db-1 && docker rm docker-workshop-db-1` and restart the database container ?
 
 1. Nothing bad, the database will restart and no data will be lost
 2. The database won't stop as the web server is holding an active connexion to it
